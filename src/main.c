@@ -9,7 +9,7 @@
 int main() {
 	// Initilization
 	init();
-	Color* canvasBuffer = createBlankCanvas(screenWidth, screenHeight);
+	Canvas canvas = createBlankCanvas(screenWidth, screenHeight);
 
 	const int brushWidth = 3;
 	bool drawing = false;
@@ -20,18 +20,18 @@ int main() {
 		// Update
 		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 			Vector2 mousePos = GetMousePosition();
-			int topLeft = ((int) mousePos.y - brushWidth/2) * screenWidth + ((int) mousePos.x - brushWidth/2);
+			int topLeft = ((int)mousePos.y - brushWidth/2) * screenWidth + ((int)mousePos.x - brushWidth/2);
 			if (drawing) {
 				int dx = prevMousePos.x - mousePos.x;
 				int dy = prevMousePos.y - mousePos.y;
 				int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
-				float xInc = (float) dx / (float) steps;
-				float yInc = (float) dy / (float) steps;
+				float xInc = (float)dx / (float)steps;
+				float yInc = (float)dy / (float)steps;
 
 				float x = mousePos.x;
 				float y = mousePos.y;
 				for (int i = 0; i <= steps; i++) {
-					canvasBuffer[(int) roundf(y) * screenWidth + (int) roundf(x)] = (Color){0, 0, 0, 255};
+					drawSquare(canvas, 5, (int)roundf(x), (int)roundf(y));
 					x += xInc;
 					y += yInc;
 				}
@@ -45,7 +45,7 @@ int main() {
 
 		// Draw
 		BeginDrawing();
-		renderCanvas(canvasBuffer);
+		renderCanvas(canvas);
 		EndDrawing();
 	}
 

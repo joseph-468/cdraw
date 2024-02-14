@@ -13,8 +13,15 @@ do { \
 extern const int screenWidth;
 extern const int screenHeight;
 
+typedef struct Canvas {
+	int width;
+	int height;
+	Color *buffer;
+} Canvas;
+
 void init();
-Color* createBlankCanvas(const int width, const int height);
-void renderCanvas(const Color *canvasBuffer);
+Canvas createBlankCanvas(const int width, const int height);
+void renderCanvas(const Canvas canvas);
+void drawSquare(const Canvas canvas, const int size, const int x, const int y);
 
 #endif
