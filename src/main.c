@@ -2,50 +2,41 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 
 #include "../include/paint.h"
 
 int main() {
 	// Initilization
 	init();
-	Canvas canvas = createBlankCanvas(screenWidth, screenHeight);
+	Canvas canvas = createBlankCanvas(0, 0, screenWidth, screenHeight);
 
-	const int brushWidth = 3;
-	bool drawing = false;
-	Vector2 prevMousePos = { 0, 0 };
+	Brush brush = {
+		.type = PENCIL,
+		.shape = SQUARE,
+		.color = (Color) { 0, 255, 255, 255 },
+		.size = 9,
+	};
+
+	double ratio = (double)screenHeight / (double)screenWidth;
+	printf("%d", screenWidth);
 
 	// Main loop
 	while (!WindowShouldClose()) {
 		// Update
-		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-			Vector2 mousePos = GetMousePosition();
-			int topLeft = ((int)mousePos.y - brushWidth/2) * screenWidth + ((int)mousePos.x - brushWidth/2);
-			if (drawing) {
-				int dx = prevMousePos.x - mousePos.x;
-				int dy = prevMousePos.y - mousePos.y;
-				int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
-				float xInc = (float)dx / (float)steps;
-				float yInc = (float)dy / (float)steps;
+		drawLine(canvas, brush, IsMouseButtonDown(MOUSE_BUTTON_LEFT));
 
-				float x = mousePos.x;
-				float y = mousePos.y;
-				for (int i = 0; i <= steps; i++) {
-					drawSquare(canvas, 5, (int)roundf(x), (int)roundf(y));
-					x += xInc;
-					y += yInc;
-				}
-			}
-			drawing = true;
-			prevMousePos = mousePos;
+		if (IsKeyDown(KEY_LEFT)) {
+			canvas.viewWidth -= 2;
+			canvas.viewHeight = canvas.viewWidth * ratio;
 		}
-		else {
-			drawing = false;
+		else if (IsKeyDown(KEY_RIGHT)) {
+			canvas.viewWidth += 2;
+			canvas.viewHeight = canvas.viewWidth * ratio;
 		}
 
 		// Draw
 		BeginDrawing();
-		renderCanvas(canvas);
+		renderCanvas(canvas, 0, 0);
 		EndDrawing();
 	}
 
