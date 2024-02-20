@@ -8,7 +8,7 @@
 int main() {
 	// Initilization
 	init();
-	Canvas canvas = createBlankCanvas(0, 0, screenWidth, screenHeight);
+	Canvas canvas = createBlankCanvas(319, 159, screenWidth - 481, screenHeight-321);
 
 	Brush brush = {
 		.type = PENCIL,
@@ -18,25 +18,25 @@ int main() {
 	};
 
 	double ratio = (double)screenHeight / (double)screenWidth;
-	printf("%d", screenWidth);
 
 	// Main loop
 	while (!WindowShouldClose()) {
 		// Update
 		drawLine(canvas, brush, IsMouseButtonDown(MOUSE_BUTTON_LEFT));
 
-		if (IsKeyDown(KEY_LEFT)) {
-			canvas.viewWidth -= 2;
-			canvas.viewHeight = canvas.viewWidth * ratio;
-		}
-		else if (IsKeyDown(KEY_RIGHT)) {
-			canvas.viewWidth += 2;
-			canvas.viewHeight = canvas.viewWidth * ratio;
-		}
-
 		// Draw
 		BeginDrawing();
-		renderCanvas(canvas, 0, 0);
+		renderCanvas(canvas);
+
+		Vector2 mousePos = GetMousePosition();
+		double widthRatio = (double)canvas.width / (double)canvas.viewWidth;
+		double heightRatio = (double)canvas.height / (double)canvas.viewHeight;
+		int mouseX = (mousePos.x - canvas.x) * widthRatio;
+		int mouseY = (mousePos.y - canvas.y) * heightRatio;
+		DrawText(TextFormat("X: %i Y: %i", mouseX, mouseY), 319, screenHeight - 161, 20, BLACK);
+
+		DrawRectangleLines(318, 158, screenWidth - 479, screenHeight - 319, BLACK);
+
 		EndDrawing();
 	}
 

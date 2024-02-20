@@ -6,8 +6,8 @@
 
 #include "../include/paint.h"
 
-const int screenWidth = 1024;
-const int screenHeight = 576;
+const int screenWidth = 1280;
+const int screenHeight = 720;
 static Texture canvasTexture;
 
 void init() {
@@ -37,7 +37,7 @@ Canvas createBlankCanvas(const int x, const int y, const int width, const int he
 }
 
 void renderCanvas(const Canvas canvas) {
-	ClearBackground(RAYWHITE);
+	ClearBackground(GRAY);
 	UpdateTexture(canvasTexture, canvas.buffer);
 	Rectangle source = { 0, 0, canvasTexture.width, canvasTexture.height };
 	Rectangle dest = { canvas.x, canvas.y, canvas.viewWidth, canvas.viewHeight };
