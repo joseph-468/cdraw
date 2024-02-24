@@ -5,6 +5,8 @@
 #include <math.h>
 
 #include "../include/paint.h"
+#include "../include/gui.h"
+#include "../include/font.h"
 
 const int screenWidth = 1280;
 const int screenHeight = 720;
@@ -14,6 +16,7 @@ void init() {
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(screenWidth, screenHeight, "Paint");
 	SetTargetFPS(0);
+	currentFont = GetFontDefault();
 }
 
 Canvas createBlankCanvas(const int x, const int y, const int width, const int height) {
