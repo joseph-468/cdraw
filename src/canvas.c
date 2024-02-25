@@ -4,20 +4,13 @@
 #include <string.h>
 #include <math.h>
 
-#include "../include/paint.h"
+#include "../include/canvas.h"
 #include "../include/gui.h"
 #include "../include/font.h"
 
 const int screenWidth = 1280;
 const int screenHeight = 720;
 static Texture canvasTexture;
-
-void init() {
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-	InitWindow(screenWidth, screenHeight, "Paint");
-	SetTargetFPS(0);
-	currentFont = GetFontDefault();
-}
 
 Canvas createBlankCanvas(const int x, const int y, const int width, const int height) {
 	Canvas canvas = {
@@ -42,8 +35,8 @@ Canvas createBlankCanvas(const int x, const int y, const int width, const int he
 void renderCanvas(const Canvas canvas) {
 	ClearBackground(GRAY);
 	UpdateTexture(canvasTexture, canvas.buffer);
-	Rectangle source = { 0, 0, canvasTexture.width, canvasTexture.height };
-	Rectangle dest = { canvas.x, canvas.y, canvas.viewWidth, canvas.viewHeight };
+	Rectangle source = { 0, 0, (float)canvasTexture.width, (float)canvasTexture.height };
+	Rectangle dest = { (float)canvas.x, (float)canvas.y, (float)canvas.viewWidth, (float)canvas.viewHeight };
 	DrawTexturePro(canvasTexture, source, dest, (Vector2){ 0, 0 }, 0, WHITE);
 }
 
@@ -74,8 +67,8 @@ void drawLine(const Canvas canvas, const Brush brush, bool shouldDraw) {
 		Vector2 mousePos = GetMousePosition();
 		double widthRatio = (double)canvas.width / (double)canvas.viewWidth;
 		double heightRatio = (double)canvas.height / (double)canvas.viewHeight;
-		int mouseX = (mousePos.x - canvas.x) * widthRatio;
-		int mouseY = (mousePos.y - canvas.y) * heightRatio;
+		int mouseX = (int)((mousePos.x - canvas.x) * widthRatio);
+		int mouseY = (int)((mousePos.y - canvas.y) * heightRatio);
 		int topLeft = (mouseY - brush.size/2) * screenWidth + (mouseX - brush.size/2);
 
 		if (drawing) {
@@ -84,8 +77,8 @@ void drawLine(const Canvas canvas, const Brush brush, bool shouldDraw) {
 			int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
 			float xInc = (float)dx / (float)steps;
 			float yInc = (float)dy / (float)steps;
-			float x = mouseX;
-			float y = mouseY;
+			float x = (float)mouseX;
+			float y = (float)mouseY;
 			for (int i = 0; i <= steps; i++) {
 				drawSquare(canvas, brush, (int)roundf(x), (int)roundf(y));
 				x += xInc;

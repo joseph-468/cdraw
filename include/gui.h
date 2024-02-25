@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-extern Font currentFont;
+#include "../include/canvas.h"
 
 typedef struct TextInput {
 	Rectangle rect;
@@ -16,8 +16,10 @@ typedef struct TextInput {
 } TextInput;
 
 bool isNumber(int ch);
+void isValidBrushSize(int ch, TextInput *const textInput);
 void isValidColor(int ch, TextInput *const textInput);
-TextInput createTextInput(const int x, const int y, const int width, const int height, const char* label, const char *defaultValue, const void (*callback)(int, TextInput const));
+void drawCoordinates(Canvas canvas);
+TextInput createTextInput(const int x, const int y, const int width, const int height, const char* label, const char *defaultValue, const void (*callback)(int, TextInput *const));
 void drawTextInput(const TextInput *const textInput);
 void getTextInput(TextInput *const textInput);
 

@@ -3,7 +3,10 @@
 
 #include <raylib.h>
 
-Font setCurrentFont(const unsigned char* data);
+extern Font currentFont;
+extern GlyphInfo currentFontInfo;
+
+void setCurrentFont(const unsigned char* data);
 
 const unsigned char jetBrainsMonoMedium[273860];
 

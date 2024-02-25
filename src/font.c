@@ -1,10 +1,14 @@
 #include "../include/font.h"
 #include "../include/gui.h"
 
-Font setCurrentFont(const unsigned char* data) {
+Font currentFont;
+GlyphInfo currentFontInfo;
+
+void setCurrentFont(const unsigned char* data) {
 	Font font = LoadFontFromMemory(".ttf", data, sizeof(data), 64, NULL, 0);
+	GlyphInfo info = GetGlyphInfo(font, 64);
 	currentFont = font;
-	return font;
+	currentFontInfo = info;
 }
 
 const unsigned char jetBrainsMonoMedium[273860] = {
