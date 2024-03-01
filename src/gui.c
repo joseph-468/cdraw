@@ -10,6 +10,10 @@ bool isNumber(int ch) {
 	return (ch > 47 && ch < 58);
 }
 
+void switchBrushType(RadioButtons* const radioButtons) {
+
+}
+
 void isValidBrushSize(int ch, TextInput *const textInput) {
 	if (atoi(textInput->text) == 0 && ch == '0') {
 		textInput->text[--textInput->index] = '\0';
@@ -21,6 +25,10 @@ void isValidBrushSize(int ch, TextInput *const textInput) {
 		textInput->text[0] = '1';
 		textInput->text[1] = '\0';
 		textInput->index = 0;
+		return;
+	}
+	if (atoi(textInput->text) > 128) {
+		strcpy_s(textInput->text, 64, "128");
 		return;
 	}
 }
@@ -39,7 +47,7 @@ void isValidColor(int ch, TextInput *const textInput) {
 		return;
 	}
 	if (atoi(textInput->text) > 255) {
-		strcpy_s(textInput->text, 256, "255");
+		strcpy_s(textInput->text, 64, "255");
 		return;
 	}
 }
@@ -63,7 +71,7 @@ TextInput createTextInput(const int x, const int y, const int width, const int h
 		.hovering = false,
 		.inputting = false,
 	};
-	strcpy_s(textInput.text, 256, defaultValue);
+	strcpy_s(textInput.text, 64, defaultValue);
 	return textInput;
 }
 
@@ -80,7 +88,7 @@ void drawTextInput(const TextInput *const textInput) {
 	}
 }
 
-void getTextInput(TextInput *const textInput) {
+void checkTextInput(TextInput *const textInput) {
 	textInput->hovering = CheckCollisionPointRec(GetMousePosition(), textInput->rect);
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		textInput->inputting = textInput->hovering;
@@ -99,4 +107,55 @@ void getTextInput(TextInput *const textInput) {
 		}
 		textInput->callback(ch, textInput);
 	}
+}
+
+RadioButtons createRadioButtons(const int x, const int y, const int buttonWidth, const int buttonHeight, const int buttonCount, const char* icons[]) {
+	RadioButtons radioButtons = {
+		.rect = {
+			.x = x,
+			.y = y,
+			.width = buttonWidth * buttonCount,
+			.height = buttonHeight,
+		},
+		.icons = NULL,
+		.buttonCount = buttonCount,
+		.selected = 0,
+	};
+
+	for (int i = 0; i < buttonCount; i++) {
+		radioButtons.icons[i] = LoadTexture(icons[i]);
+		SetTextureWrap(radioButtons.icons[i], TEXTURE_WRAP_CLAMP);
+	}
+
+	return radioButtons;
+}
+
+void drawRadioButtons(const RadioButtons *const radioButtons) {
+	int buttonWidth = radioButtons->rect.width / radioButtons->buttonCount;
+	Rectangle iconRect = { radioButtons->rect.x, radioButtons->rect.y, buttonWidth, radioButtons->rect.height };
+	for (int i = 0; i < radioButtons->buttonCount; i++) {
+		Rectangle selectedRect = { iconRect.x + 4, iconRect.y + 4, buttonWidth - 8, radioButtons->rect.height - 8 };
+		if (i == radioButtons->selected) {
+			DrawRectangleRec(iconRect, WHITE);
+		}
+		else {
+			DrawRectangleRec(iconRect, LIGHTGRAY);
+		}
+		DrawRectangleLinesEx(iconRect, 1, BLACK);
+		DrawTexture(radioButtons->icons[i], iconRect.x, iconRect.y , WHITE);
+		if (i == radioButtons->selected) {
+			DrawRectangleLinesEx(selectedRect, 2, BEIGE);
+		}
+		iconRect.x += buttonWidth;
+	}
+}
+
+int checkRadioButtons(RadioButtons *const radioButtons) {
+	Vector2 mousePos = GetMousePosition();
+	bool hovering = CheckCollisionPointRec(mousePos, radioButtons->rect);
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && hovering) {
+		int button = (mousePos.x - radioButtons->rect.x) / (radioButtons->rect.width / radioButtons->buttonCount);
+		radioButtons->selected = button;
+	}
+	return radioButtons->selected;
 }

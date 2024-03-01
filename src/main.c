@@ -1,6 +1,5 @@
 #include <raylib.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "../include/canvas.h"
@@ -12,6 +11,7 @@ int main() {
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(screenWidth, screenHeight, "Paint");
 	SetTargetFPS(0);
+	BeginBlendMode(BLEND_ALPHA);
 
 	setCurrentFont(jetBrainsMonoMedium);
 	Canvas canvas = createBlankCanvas(319, 159, screenWidth - 481, screenHeight - 321);
@@ -22,6 +22,8 @@ int main() {
 		.size = 8,
 	};
 
+	const char* icons[2] = { "assets/square.png", "assets/circle.png" };
+	RadioButtons brushTypeButtons = createRadioButtons(48, 48, 32, 32, 2, icons, switchBrushType);
 	TextInput brushSizeBox = createTextInput(200, 100, 70, 30, "Brush Size", "8", isValidBrushSize);
 	TextInput redBox = createTextInput(50, 100, 70, 30, "red", "0", isValidColor);
 	TextInput greenBox = createTextInput(50, 150, 70, 30, "green", "0", isValidColor);
@@ -40,20 +42,25 @@ int main() {
 		}
 
 		// Update canvas buffer
-		drawLine(canvas, brush, IsMouseButtonDown(MOUSE_BUTTON_LEFT));
+		tryDrawToCanvas(canvas, brush, IsMouseButtonDown(MOUSE_BUTTON_LEFT));
 
 		// Start rendering to screen
 		BeginDrawing();
 
 		// Update GUI
 		drawCoordinates(canvas);
-		getTextInput(&brushSizeBox);
+
+		brush.shape = checkRadioButtons(&brushTypeButtons);
+		drawRadioButtons(&brushTypeButtons);
+
+		checkTextInput(&brushSizeBox);
 		drawTextInput(&brushSizeBox);
-		getTextInput(&redBox);
+
+		checkTextInput(&redBox);
 		drawTextInput(&redBox);
-		getTextInput(&greenBox);
+		checkTextInput(&greenBox);
 		drawTextInput(&greenBox);
-		getTextInput(&blueBox);
+		checkTextInput(&blueBox);
 		drawTextInput(&blueBox);
 
 		brush.size = atoi(brushSizeBox.text);

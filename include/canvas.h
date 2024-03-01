@@ -37,10 +37,8 @@ typedef struct Brush {
 	int size;
 } Brush;
 
-void init();
 Canvas createBlankCanvas(const int x, const int y, const int width, const int height);
 void renderCanvas(const Canvas canvas);
-void drawSquare(const Canvas canvas, const Brush brush, const int x, const int y);
-void drawLine(const Canvas canvas, const Brush brush, bool shouldDraw);
+void tryDrawToCanvas(const Canvas canvas, const Brush brush, bool shouldDraw);
 
 #endif

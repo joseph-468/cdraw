@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <raymath.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -58,7 +59,31 @@ void drawSquare(const Canvas canvas, const Brush brush, const int x, const int y
 	}
 }
 
-void drawLine(const Canvas canvas, const Brush brush, bool shouldDraw) {
+void drawCircle(const Canvas canvas, const Brush brush, int x, int y) {
+	const int halfSize = brush.size / 2;
+	const double radius = (double)brush.size / 2;
+	const int left = max(x - halfSize, 0);
+	if (left > canvas.width-1) return;
+	const int top = max(y - halfSize, 0);
+	if (top > canvas.height-1) return;
+	const int right = min(x + halfSize + ((brush.size % 2 == 0) ? 0 : 1), canvas.width);
+	if (right < 0) return;
+	const int bottom = min(y + halfSize + ((brush.size % 2 == 0) ? 0 : 1), canvas.height);
+	if (bottom < 0) return;
+
+	float evenOffset = ((brush.size % 2 == 0) ? 0.5 : 0);
+	double distance;
+	for (int i = top; i < bottom; i++) {
+		for (int j = left; j < right; j++) {
+			distance = Vector2Distance((Vector2){ x-evenOffset, y-evenOffset }, (Vector2){ j, i });
+			if (distance <= radius) {
+				canvas.buffer[i * canvas.width + j] = brush.color;
+			}
+		}
+	}
+}
+
+void tryDrawToCanvas(const Canvas canvas, const Brush brush, bool shouldDraw) {
 	static bool drawing = false;
 	static int prevMouseX = 0;
 	static int prevMouseY = 0;
@@ -80,7 +105,12 @@ void drawLine(const Canvas canvas, const Brush brush, bool shouldDraw) {
 			float x = (float)mouseX;
 			float y = (float)mouseY;
 			for (int i = 0; i <= steps; i++) {
-				drawSquare(canvas, brush, (int)roundf(x), (int)roundf(y));
+				if (brush.shape == SQUARE) {
+					drawSquare(canvas, brush, (int)roundf(x), (int)roundf(y));
+				}
+				if (brush.shape == CIRCLE) {
+					drawCircle(canvas, brush, (int)roundf(x), (int)roundf(y));
+				}
 				x += xInc;
 				y += yInc;
 			}
