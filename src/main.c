@@ -23,7 +23,7 @@ int main() {
 	};
 
 	const char* icons[2] = { "assets/square.png", "assets/circle.png" };
-	RadioButtons brushTypeButtons = createRadioButtons(48, 48, 32, 32, 2, icons, switchBrushType);
+	RadioButtons brushTypeButtons = createRadioButtons(500, 100, 32, 32, 2, icons);
 	TextInput brushSizeBox = createTextInput(200, 100, 70, 30, "Brush Size", "8", isValidBrushSize);
 	TextInput redBox = createTextInput(50, 100, 70, 30, "red", "0", isValidColor);
 	TextInput greenBox = createTextInput(50, 150, 70, 30, "green", "0", isValidColor);

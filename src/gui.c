@@ -10,18 +10,14 @@ bool isNumber(int ch) {
 	return (ch > 47 && ch < 58);
 }
 
-void switchBrushType(RadioButtons* const radioButtons) {
-
-}
-
 void isValidBrushSize(int ch, TextInput *const textInput) {
 	if (atoi(textInput->text) == 0 && ch == '0') {
 		textInput->text[--textInput->index] = '\0';
 	}
-	if (!isNumber(ch) && ch != KEY_BACKSPACE) {
+	if (!isNumber(ch) && ch != KEY_BACKSPACE && ch != '\0') {
 		textInput->text[--textInput->index] = '\0';
 	}
-	if (textInput->index < 1) {
+	if (textInput->index < 1 && ch != '\0') {
 		textInput->text[0] = '1';
 		textInput->text[1] = '\0';
 		textInput->index = 0;
@@ -31,16 +27,20 @@ void isValidBrushSize(int ch, TextInput *const textInput) {
 		strcpy_s(textInput->text, 64, "128");
 		return;
 	}
+	if (atoi(textInput->text) < 1) {
+		strcpy_s(textInput->text, 64, "1");
+		return;
+	}
 }
 
 void isValidColor(int ch, TextInput *const textInput) {
 	if (atoi(textInput->text) == 0 && ch == '0') {
 		textInput->text[--textInput->index] = '\0';
 	}
-	if (!isNumber(ch) && ch != KEY_BACKSPACE) {
+	if (!isNumber(ch) && ch != KEY_BACKSPACE && ch != '\0') {
 		textInput->text[--textInput->index] = '\0';
 	}
-	if (textInput->index < 1) {
+	if (textInput->index < 1 && ch != '\0') {
 		textInput->text[0] = '0';
 		textInput->text[1] = '\0';
 		textInput->index = 0;
@@ -48,6 +48,10 @@ void isValidColor(int ch, TextInput *const textInput) {
 	}
 	if (atoi(textInput->text) > 255) {
 		strcpy_s(textInput->text, 64, "255");
+		return;
+	}
+	if (atoi(textInput->text) < 0) {
+		strcpy_s(textInput->text, 64, "0");
 		return;
 	}
 }
@@ -95,17 +99,33 @@ void checkTextInput(TextInput *const textInput) {
 	}
 	if (textInput->inputting) {
 		int ch = GetKeyPressed();
-		if (!ch) return;
-		if (ch == KEY_BACKSPACE && textInput->index > 0) {
-			textInput->text[--textInput->index] = '\0';
-		}
-		else if (ch != KEY_BACKSPACE) {
-			if (textInput->index < 3) {
-				textInput->text[textInput->index++] = ch;
-				textInput->text[textInput->index] = '\0';
+		if (ch) {
+			if (ch == KEY_BACKSPACE && textInput->index > 0) {
+				textInput->text[--textInput->index] = '\0';
 			}
+			else if (ch != KEY_BACKSPACE) {
+				if (textInput->index < 3) {
+					textInput->text[textInput->index++] = ch;
+					textInput->text[textInput->index] = '\0';
+				}
+			}
+			textInput->callback(ch, textInput);
 		}
-		textInput->callback(ch, textInput);
+	}
+
+	if (textInput->hovering) {
+		int scroll = (int)GetMouseWheelMoveV().y;
+		if (scroll) {
+			int currentValue = atoi(textInput->text) + scroll;
+			sprintf(textInput->text, "%d", currentValue);
+			if (currentValue > 0) {
+				textInput->index = strlen(textInput->text);
+			}
+			else {
+				textInput->index = 0;
+			}
+			textInput->callback(0, textInput);
+		}
 	}
 }
 

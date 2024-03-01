@@ -22,7 +22,6 @@ typedef struct RadioButtons {
 	int selected;
 } RadioButtons ;
 
-void switchBrushType(RadioButtons *const radioButtons);
 void isValidBrushSize(int ch, TextInput *const textInput);
 void isValidColor(int ch, TextInput *const textInput);
 void drawCoordinates(Canvas canvas);
