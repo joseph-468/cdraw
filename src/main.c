@@ -5,6 +5,7 @@
 #include "../include/canvas.h"
 #include "../include/gui.h"
 #include "../include/font.h"
+#include "../include/icon.h"
 
 int main() {
 	// Initilization
@@ -22,8 +23,9 @@ int main() {
 		.size = 8,
 	};
 
-	const char* icons[2] = { "assets/square.png", "assets/circle.png" };
-	RadioButtons brushTypeButtons = createRadioButtons(500, 100, 32, 32, 2, icons);
+	const unsigned char *icons[2] = { squareIcon, circleIcon };
+	const int iconLens[2] = { squareIconLen, circleIconLen };
+	RadioButtons brushTypeButtons = createRadioButtons(500, 100, 32, 32, 2, icons, iconLens);
 	TextInput brushSizeBox = createTextInput(200, 100, 70, 30, "Brush Size", "8", isValidBrushSize);
 	TextInput redBox = createTextInput(50, 100, 70, 30, "red", "0", isValidColor);
 	TextInput greenBox = createTextInput(50, 150, 70, 30, "green", "0", isValidColor);

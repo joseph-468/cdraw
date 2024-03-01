@@ -4,6 +4,8 @@
 #include "../include/canvas.h"
 #include "../include/font.h"
 #include "../include/gui.h"
+#include "../include/icon.h"
+
 
 // GUI callback stuff is all a bit shitty
 bool isNumber(int ch) {
@@ -129,7 +131,7 @@ void checkTextInput(TextInput *const textInput) {
 	}
 }
 
-RadioButtons createRadioButtons(const int x, const int y, const int buttonWidth, const int buttonHeight, const int buttonCount, const char* icons[]) {
+RadioButtons createRadioButtons(const int x, const int y, const int buttonWidth, const int buttonHeight, const int buttonCount, const unsigned char *icons[], const int iconLens[]) {
 	RadioButtons radioButtons = {
 		.rect = {
 			.x = x,
@@ -143,8 +145,7 @@ RadioButtons createRadioButtons(const int x, const int y, const int buttonWidth,
 	};
 
 	for (int i = 0; i < buttonCount; i++) {
-		radioButtons.icons[i] = LoadTexture(icons[i]);
-		SetTextureWrap(radioButtons.icons[i], TEXTURE_WRAP_CLAMP);
+		radioButtons.icons[i] = loadIcon(icons[i], iconLens[i]);
 	}
 
 	return radioButtons;

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "../include/canvas.h"
+#include "../include/icon.h"
 
 typedef struct TextInput {
 	Rectangle rect;
@@ -18,7 +19,7 @@ typedef struct TextInput {
 typedef struct RadioButtons {
 	Rectangle rect;
 	Texture icons[8];
-	int buttonCount;
+	const int buttonCount;
 	int selected;
 } RadioButtons ;
 
@@ -28,7 +29,7 @@ void drawCoordinates(Canvas canvas);
 TextInput createTextInput(const int x, const int y, const int width, const int height, const char* label, const char *defaultValue, const void (*callback)(int, TextInput *const));
 void drawTextInput(const TextInput *const textInput);
 void checkTextInput(TextInput *const textInput);
-RadioButtons createRadioButtons(const int x, const int y, const int buttonWidth, const int buttonHeight, const int buttonCount, const char* icons[]);
+RadioButtons createRadioButtons(const int x, const int y, const int buttonWidth, const int buttonHeight, const int buttonCount, const unsigned char *icons[], const int iconLens[]);
 void drawRadioButtons(const RadioButtons* const radioButtons);
 int checkRadioButtons(RadioButtons* const radioButtons);
 
