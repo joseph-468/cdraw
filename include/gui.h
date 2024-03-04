@@ -6,6 +6,8 @@
 #include "../include/canvas.h"
 #include "../include/icon.h"
 
+extern bool hoveringGUI;
+
 typedef struct TextInput {
 	Rectangle rect;
 	const char *label;
@@ -25,7 +27,7 @@ typedef struct RadioButtons {
 
 void isValidBrushSize(int ch, TextInput *const textInput);
 void isValidColor(int ch, TextInput *const textInput);
-void drawCoordinates(Canvas canvas);
+void drawCoordinates(Canvas *canvas);
 TextInput createTextInput(const int x, const int y, const int width, const int height, const char* label, const char *defaultValue, const void (*callback)(int, TextInput *const));
 void drawTextInput(const TextInput *const textInput);
 void checkTextInput(TextInput *const textInput);

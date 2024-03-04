@@ -6,8 +6,8 @@
 #include "../include/gui.h"
 #include "../include/icon.h"
 
+bool hoveringGUI = false;
 
-// GUI callback stuff is all a bit shitty
 bool isNumber(int ch) {
 	return (ch > 47 && ch < 58);
 }
@@ -58,12 +58,12 @@ void isValidColor(int ch, TextInput *const textInput) {
 	}
 }
 
-void drawCoordinates(Canvas canvas) {
+void drawCoordinates(Canvas *canvas) {
 	Vector2 mousePos = GetMousePosition();
-	double widthRatio = (double)canvas.width / (double)canvas.viewWidth;
-	double heightRatio = (double)canvas.height / (double)canvas.viewHeight;
-	int mouseX = (mousePos.x - canvas.x) * widthRatio;
-	int mouseY = (mousePos.y - canvas.y) * heightRatio;
+	double widthRatio = (double)canvas->width / (double)canvas->viewWidth;
+	double heightRatio = (double)canvas->height / (double)canvas->viewHeight;
+	int mouseX = (mousePos.x - canvas->x) * widthRatio;
+	int mouseY = (mousePos.y - canvas->y) * heightRatio;
 	DrawTextEx(currentFont, TextFormat("X: %i Y: %i", mouseX, mouseY), (Vector2){319, screenHeight - 161}, 32, 0, BLACK);
 }
 
@@ -87,7 +87,6 @@ void drawTextInput(const TextInput *const textInput) {
 	DrawTextEx(currentFont, TextFormat("%s", textInput->text), (Vector2){textInput->rect.x+4, textInput->rect.y}, 32, 0, BLACK);
 	DrawTextEx(currentFont, TextFormat("%s", textInput->label), (Vector2){textInput->rect.x+textInput->rect.width+4, textInput->rect.y}, 32, 0, BLACK);
 	if (textInput->inputting) {
-		// Need to add blinking effect
 		double fontSizeRatio = (double)currentFont.baseSize / 32;
 		DrawRectangle(textInput->rect.x + 4 + currentFontInfo.advanceX * textInput->index / fontSizeRatio,
 			textInput->rect.y + 26, 16, 2, (Color) { 0, 0, 0, 255 });
@@ -96,7 +95,10 @@ void drawTextInput(const TextInput *const textInput) {
 
 void checkTextInput(TextInput *const textInput) {
 	textInput->hovering = CheckCollisionPointRec(GetMousePosition(), textInput->rect);
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+	if (textInput->hovering) {
+		hoveringGUI = true;
+	}
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || GetMouseWheelMoveV().y) {
 		textInput->inputting = textInput->hovering;
 	}
 	if (textInput->inputting) {
@@ -174,6 +176,9 @@ void drawRadioButtons(const RadioButtons *const radioButtons) {
 int checkRadioButtons(RadioButtons *const radioButtons) {
 	Vector2 mousePos = GetMousePosition();
 	bool hovering = CheckCollisionPointRec(mousePos, radioButtons->rect);
+	if (hovering) {
+		hoveringGUI = true;
+	}
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && hovering) {
 		int button = (mousePos.x - radioButtons->rect.x) / (radioButtons->rect.width / radioButtons->buttonCount);
 		radioButtons->selected = button;

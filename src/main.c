@@ -11,7 +11,7 @@ int main() {
 	// Initilization
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(screenWidth, screenHeight, "Paint");
-	SetTargetFPS(0);
+	SetTargetFPS(360);
 	BeginBlendMode(BLEND_ALPHA);
 
 	setCurrentFont(jetBrainsMonoMedium);
@@ -23,13 +23,19 @@ int main() {
 		.size = 8,
 	};
 
-	const unsigned char *icons[2] = { squareIcon, circleIcon };
-	const int iconLens[2] = { squareIconLen, circleIconLen };
-	RadioButtons brushTypeButtons = createRadioButtons(500, 100, 32, 32, 2, icons, iconLens);
-	TextInput brushSizeBox = createTextInput(200, 100, 70, 30, "Brush Size", "8", isValidBrushSize);
-	TextInput redBox = createTextInput(50, 100, 70, 30, "red", "0", isValidColor);
-	TextInput greenBox = createTextInput(50, 150, 70, 30, "green", "0", isValidColor);
-	TextInput blueBox = createTextInput(50, 200, 70, 30, "blue", "0", isValidColor);
+	const unsigned char *shapeIcons[2] = { squareIcon, circleIcon };
+	const int shapeIconLens[2] = { squareIconLen, circleIconLen };
+	RadioButtons brushShapeButtons = createRadioButtons(50, 100, 32, 32, 2, shapeIcons, shapeIconLens);
+
+	const unsigned char *typeIcons[2] = { pencilIcon, eraserIcon };
+	const int typeIconLens[2] = { pencilIconLen, eraserIconLen };
+	RadioButtons brushTypeButtons = createRadioButtons(150, 100, 32, 32, 2, typeIcons, typeIconLens);
+
+	TextInput brushSizeBox = createTextInput(50, 175, 70, 30, "Brush Size", "8", isValidBrushSize);
+	TextInput redBox = createTextInput(50, 225, 70, 30, "Red", "0", isValidColor);
+	TextInput greenBox = createTextInput(50, 275, 70, 30, "Green", "0", isValidColor);
+	TextInput blueBox = createTextInput(50, 325, 70, 30, "Blue", "0", isValidColor);
+	TextInput alphaBox = createTextInput(50, 375, 70, 30, "Alpha", "255", isValidColor);
 
 	// Main loop
 	while (!WindowShouldClose()) {
@@ -43,16 +49,31 @@ int main() {
 			ExportImage(image, "image.png");
 		}
 
+		if (GetMouseWheelMoveV().y && !hoveringGUI) {
+			Vector2 cursorPos = GetMousePosition();
+			double widthRatio = (double)canvas.width / (double)canvas.height;
+			double x = widthRatio * 10 * GetMouseWheelMoveV().y;
+			double y = 10 * GetMouseWheelMoveV().y;
+			canvas.viewWidth += x;
+			canvas.viewHeight += y;
+			canvas.x = 319 + (double)(screenWidth-481 - canvas.viewWidth) / 2;
+			canvas.y = 159 + (double)(screenHeight-321 - canvas.viewHeight) / 2;
+		}
+
 		// Update canvas buffer
-		tryDrawToCanvas(canvas, brush, IsMouseButtonDown(MOUSE_BUTTON_LEFT));
+		tryDrawToCanvas(&canvas, brush);
 
 		// Start rendering to screen
 		BeginDrawing();
 
 		// Update GUI
-		drawCoordinates(canvas);
+		hoveringGUI = false;
+		drawCoordinates(&canvas);
 
-		brush.shape = checkRadioButtons(&brushTypeButtons);
+		brush.shape = checkRadioButtons(&brushShapeButtons);
+		drawRadioButtons(&brushShapeButtons);
+
+		brush.type = checkRadioButtons(&brushTypeButtons);
 		drawRadioButtons(&brushTypeButtons);
 
 		checkTextInput(&brushSizeBox);
@@ -64,15 +85,18 @@ int main() {
 		drawTextInput(&greenBox);
 		checkTextInput(&blueBox);
 		drawTextInput(&blueBox);
+		checkTextInput(&alphaBox);
+		drawTextInput(&alphaBox);
 
 		brush.size = atoi(brushSizeBox.text);
 		brush.color.r = atoi(redBox.text);
 		brush.color.g = atoi(greenBox.text);
 		brush.color.b = atoi(blueBox.text);
+		brush.color.a = atoi(alphaBox.text);
 
 		// Draw canvas to screen
 		DrawRectangleLines(318, 158, screenWidth - 479, screenHeight - 319, BLACK);
-		renderCanvas(canvas);
+		renderCanvas(&canvas);
 
 		EndDrawing();
 	}

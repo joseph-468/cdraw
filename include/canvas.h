@@ -14,15 +14,17 @@ extern const int screenWidth;
 extern const int screenHeight;
 
 typedef struct Canvas {
-	int x, y;
 	int width, height;
-	int viewWidth, viewHeight;
+	double x, y;
+	double viewWidth, viewHeight;
+	int viewportWidth, viewportHeight;
+	double viewportX, viewportY;
 	Color *buffer;
 } Canvas;
 
 typedef enum BrushType {
 	PENCIL,
-	PEN,
+	ERASER,
 } BrushType;
 
 typedef enum Shape {
@@ -37,8 +39,8 @@ typedef struct Brush {
 	int size;
 } Brush;
 
-Canvas createBlankCanvas(const int x, const int y, const int width, const int height);
-void renderCanvas(const Canvas canvas);
-void tryDrawToCanvas(const Canvas canvas, const Brush brush, bool shouldDraw);
+Canvas createBlankCanvas(const double x, const double y, const int width, const int height);
+void renderCanvas(const Canvas *canvas);
+void tryDrawToCanvas(const Canvas *canvas, const Brush brush);
 
 #endif
