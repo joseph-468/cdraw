@@ -42,6 +42,17 @@ Canvas createBlankCanvas(const double x, const double y, const int width, const 
 	return canvas;
 }
 
+// Might move to seperate file
+bool saveImage(const Canvas *canvas) {
+	Image image = GenImageColor(canvas->width, canvas->height, (Color){ 0, 0, 0 });
+	for (int i = 0; i < canvas->height; i++) {
+		for (int j = 0; j < canvas->width; j++) {
+			ImageDrawPixel(&image, j, i, canvas->buffer[i * canvas->width + j]);
+		}
+	}
+	ExportImage(image, "image.png");
+}
+
 void renderCanvas(const Canvas *canvas) {
 	ClearBackground(GRAY);
 	UpdateTexture(canvasTexture, canvas->buffer);
@@ -61,21 +72,20 @@ void drawSquare(const Canvas *canvas, const Brush brush, const int x, const int 
 	const int bottom = min(y + halfSize + ((brush.size % 2 == 0) ? 0 : 1), canvas->height);
 	if (bottom < 0) return;
 
-	size_t dest;
-	int r, g, b, a;
 	for (int i = top; i < bottom; i++) {
 		for (int j = left; j < right; j++) {
-			dest = i * canvas->width + j;
+			size_t dest = i * canvas->width + j;
 			if (!drawnPixels[dest]) {
+				int r, g, b, a;
 				if (brush.type == PENCIL) {
 					Color dstColor = canvas->buffer[dest];
 					double normalizedAlpha = (double)brush.color.a / 255;
-					r = brush.color.r * normalizedAlpha + dstColor.r * (1 - normalizedAlpha);
-					g = brush.color.g * normalizedAlpha + dstColor.g * (1 - normalizedAlpha);
-					b = brush.color.b * normalizedAlpha + dstColor.b * (1 - normalizedAlpha); 
-					a = (normalizedAlpha + ((double)dstColor.a / 255 * (1 - normalizedAlpha))) * 255;
+					r = (int)(brush.color.r * normalizedAlpha + dstColor.r * (1 - normalizedAlpha));
+					g = (int)(brush.color.g * normalizedAlpha + dstColor.g * (1 - normalizedAlpha));
+					b = (int)(brush.color.b * normalizedAlpha + dstColor.b * (1 - normalizedAlpha)); 
+					a = (int)(normalizedAlpha + ((double)dstColor.a / 255 * (1 - normalizedAlpha))) * 255;
 				}
-				else if (brush.type == ERASER) {
+				else {
 					r = g = b = a = 0;
 				}
 				canvas->buffer[i * canvas->width + j] = (Color){ r, g, b, a };
@@ -97,25 +107,24 @@ void drawCircle(const Canvas *canvas, const Brush brush, int x, int y) {
 	const int bottom = min(y + halfSize + ((brush.size % 2 == 0) ? 0 : 1), canvas->height);
 	if (bottom < 0) return;
 
-	float evenOffset = ((brush.size % 2 == 0) ? 0.5 : 0);
+	float evenOffset = (float)((brush.size % 2 == 0) ? 0.5 : 0);
 	double distance;
-	size_t dest;
-	int r, g, b, a;
 	for (int i = top; i < bottom; i++) {
 		for (int j = left; j < right; j++) {
-			distance = Vector2Distance((Vector2){ x-evenOffset, y-evenOffset }, (Vector2){ j, i });
+			distance = Vector2Distance((Vector2){ x-evenOffset, y-evenOffset }, (Vector2){ (float)j, (float)i });
 			if (distance <= radius) {
-				dest = i * canvas->width + j;
+				int r, g, b, a;
+				size_t dest = i * canvas->width + j;
 				if (!drawnPixels[dest]) {
 					if (brush.type == PENCIL) {
 						Color dstColor = canvas->buffer[dest];
 						double normalizedAlpha = (double)brush.color.a / 255;
-						r = brush.color.r * normalizedAlpha + dstColor.r * (1 - normalizedAlpha);
-						g = brush.color.g * normalizedAlpha + dstColor.g * (1 - normalizedAlpha);
-						b = brush.color.b * normalizedAlpha + dstColor.b * (1 - normalizedAlpha); 
-						a = (normalizedAlpha + ((double)dstColor.a / 255 * (1 - normalizedAlpha))) * 255;
+						r = (int)(brush.color.r * normalizedAlpha + dstColor.r * (1 - normalizedAlpha));
+						g = (int)(brush.color.g * normalizedAlpha + dstColor.g * (1 - normalizedAlpha));
+						b = (int)(brush.color.b * normalizedAlpha + dstColor.b * (1 - normalizedAlpha)); 
+						a = (int)(normalizedAlpha + ((double)dstColor.a / 255 * (1 - normalizedAlpha))) * 255;
 					}
-					else if (brush.type == ERASER) {
+					else {
 						r = g = b = a = 0;
 					}
 					canvas->buffer[i * canvas->width + j] = (Color){ r, g, b, a };

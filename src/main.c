@@ -23,6 +23,8 @@ int main() {
 		.size = 8,
 	};
 
+	TextButton saveButton = createTextButton(10, 10, 100, 30, "Save");
+
 	const unsigned char *shapeIcons[2] = { squareIcon, circleIcon };
 	const int shapeIconLens[2] = { squareIconLen, circleIconLen };
 	RadioButtons brushShapeButtons = createRadioButtons(50, 100, 32, 32, 2, shapeIcons, shapeIconLens);
@@ -32,23 +34,13 @@ int main() {
 	RadioButtons brushTypeButtons = createRadioButtons(150, 100, 32, 32, 2, typeIcons, typeIconLens);
 
 	TextInput brushSizeBox = createTextInput(50, 175, 70, 30, "Brush Size", "8", isValidBrushSize);
-	TextInput redBox = createTextInput(50, 225, 70, 30, "Red", "0", isValidColor);
-	TextInput greenBox = createTextInput(50, 275, 70, 30, "Green", "0", isValidColor);
-	TextInput blueBox = createTextInput(50, 325, 70, 30, "Blue", "0", isValidColor);
-	TextInput alphaBox = createTextInput(50, 375, 70, 30, "Alpha", "255", isValidColor);
+	TextInput redBox = createTextInput(50, 250, 70, 30, "Red", "0", isValidColor);
+	TextInput greenBox = createTextInput(50, 300, 70, 30, "Green", "0", isValidColor);
+	TextInput blueBox = createTextInput(50, 350, 70, 30, "Blue", "0", isValidColor);
+	TextInput alphaBox = createTextInput(50, 400, 70, 30, "Alpha", "255", isValidColor);
 
 	// Main loop
 	while (!WindowShouldClose()) {
-		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-			Image image = GenImageColor(canvas.width, canvas.height, (Color){ 0, 0, 0 });
-			for (int i = 0; i < canvas.height; i++) {
-				for (int j = 0; j < canvas.width; j++) {
-					ImageDrawPixel(&image, j, i, canvas.buffer[i * canvas.width + j]);
-				}
-			}
-			ExportImage(image, "image.png");
-		}
-
 		if (GetMouseWheelMoveV().y && !hoveringGUI) {
 			Vector2 cursorPos = GetMousePosition();
 			double widthRatio = (double)canvas.width / (double)canvas.height;
@@ -69,6 +61,11 @@ int main() {
 		// Update GUI
 		hoveringGUI = false;
 		drawCoordinates(&canvas);
+
+		drawTextButton(&saveButton);
+		if (textButtonPressed(&saveButton)) {
+			saveImage(&canvas);
+		}
 
 		brush.shape = checkRadioButtons(&brushShapeButtons);
 		drawRadioButtons(&brushShapeButtons);

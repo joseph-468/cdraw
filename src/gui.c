@@ -185,3 +185,33 @@ int checkRadioButtons(RadioButtons *const radioButtons) {
 	}
 	return radioButtons->selected;
 }
+
+TextButton createTextButton(const int x, const int y, const int width, const int height, const char *label) {
+	TextButton textButton = {
+		.rect = {
+			.x = x,
+			.y = y,
+			.width = width,
+			.height = height,
+		},
+		.label = label,
+	};
+
+	return textButton;
+}
+
+void drawTextButton(const TextButton *const textButton) {
+	Color backgroundColor = CheckCollisionPointRec(GetMousePosition(), textButton->rect) ? RAYWHITE : (Color) { 200, 200, 200, 200 };
+	DrawRectangleRec(textButton->rect, backgroundColor);
+	DrawRectangleLinesEx(textButton->rect, 1, BLACK);
+	DrawTextEx(currentFont, TextFormat("%s", textButton->label), (Vector2){textButton->rect.x+4, textButton->rect.y}, 32, 0, BLACK);
+}
+
+bool textButtonPressed(TextButton* const textButton) {
+	Vector2 mousePos = GetMousePosition();
+	bool hovering = CheckCollisionPointRec(mousePos, textButton->rect);
+	if (hovering) {
+		hoveringGUI = true;
+	}
+	return (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && hovering);
+}
