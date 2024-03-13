@@ -10,17 +10,18 @@ do { \
 	} \
 } while(0) \
 
-extern const int screenWidth;
-extern const int screenHeight;
-
 typedef struct Canvas {
 	int width, height;
-	double x, y;
-	double viewWidth, viewHeight;
-	int viewportWidth, viewportHeight;
-	double viewportX, viewportY;
 	Color *buffer;
 } Canvas;
+
+typedef struct Viewport {
+	Canvas* canvas;
+	double canvasX, canvasY;
+	double canvasWidth, canvasHeight;
+	int x, y;
+	int width, height;
+} Viewport;
 
 typedef enum BrushType {
 	PENCIL,
@@ -39,8 +40,12 @@ typedef struct Brush {
 	int size;
 } Brush;
 
-Canvas createBlankCanvas(const double x, const double y, const int width, const int height);
-void renderCanvas(const Canvas *canvas);
-void tryDrawToCanvas(const Canvas *canvas, const Brush brush);
+Canvas createBlankCanvas(const int width, const int height);
+Viewport createViewport(const Canvas *canvas, const double x, const double y);
+void resizeViewport(Viewport *viewport);
+void scaleCanvasInViewport(Viewport *viewport);
+void renderCanvas(const Viewport *viewport);
+void tryDrawToCanvas(const Viewport *viewport, const Canvas *canvas, const Brush brush);
+bool saveImage(const Canvas* canvas);
 
 #endif

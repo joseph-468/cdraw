@@ -9,21 +9,72 @@
 #include "../include/gui.h"
 #include "../include/font.h"
 
-const int screenWidth = 1280;
-const int screenHeight = 720;
+#define DISTANCE_FROM_WIDTH 480;
+#define DISTANCE_FROM_HEIGHT 270;
+
 static Texture canvasTexture;
 
 bool drawing = false;
 bool *drawnPixels;
 
-Canvas createBlankCanvas(const double x, const double y, const int width, const int height) {
-	Canvas canvas = {
+Viewport createViewport(const Canvas *canvas, const double x, const double y) {
+	Viewport viewport = {
+		.canvas = canvas,
+		.canvasX = 0,
+		.canvasY = 0,
+		.canvasWidth = canvas->width,
+		.canvasHeight = canvas->height,
 		.x = x,
 		.y = y,
+		.width = 0,
+		.height = 0,
+	};
+
+	resizeViewport(&viewport);
+	scaleCanvasInViewport(&viewport);
+
+	return viewport;
+}
+
+void resizeViewport(Viewport* viewport) {
+	double prevWidth = viewport->width;
+	double prevHeight = viewport->height;
+	viewport->width = GetScreenWidth() - DISTANCE_FROM_WIDTH;
+	viewport->height = GetScreenHeight() - DISTANCE_FROM_HEIGHT;
+
+	double widthIncrease = viewport->width / prevWidth;
+	double heightIncrease = viewport->height / prevHeight;
+	if (widthIncrease > heightIncrease) {
+		viewport->canvasWidth *= widthIncrease;
+		viewport->canvasHeight *= widthIncrease;
+	}
+	else if (heightIncrease > widthIncrease) {
+		viewport->canvasWidth *= heightIncrease;
+		viewport->canvasHeight *= heightIncrease;
+	}
+}
+
+void scaleCanvasInViewport(Viewport* viewport) {
+	if (viewport->canvasWidth > viewport->width) {
+		double newScale = viewport->width / viewport->canvasWidth;
+		viewport->canvasWidth *= newScale;
+		viewport->canvasHeight *= newScale;
+	}
+	if (viewport->canvasHeight > viewport->height) {
+		double newScale = viewport->height / viewport->canvasHeight;
+		viewport->canvasWidth *= newScale;
+		viewport->canvasHeight *= newScale;
+	}
+
+	double widthRatio = (double)viewport->canvas->width / (double)viewport->canvas->height;
+	viewport->canvasX = (double)(viewport->width - viewport->canvasWidth) / 2;
+	viewport->canvasY = (double)(viewport->height - viewport->canvasHeight) / 2;
+}
+
+Canvas createBlankCanvas(const int width, const int height) {
+	Canvas canvas = {
 		.width = width,
 		.height = height,
-		.viewWidth = width,
-		.viewHeight = height,
 		.buffer = NULL,
 	};
 
@@ -51,13 +102,13 @@ bool saveImage(const Canvas *canvas) {
 		}
 	}
 	ExportImage(image, "image.png");
+	return true;
 }
 
-void renderCanvas(const Canvas *canvas) {
-	ClearBackground(GRAY);
-	UpdateTexture(canvasTexture, canvas->buffer);
+void renderCanvas(const Viewport *viewport) {
+	UpdateTexture(canvasTexture, viewport->canvas->buffer);
 	Rectangle source = { 0, 0, (float)canvasTexture.width, (float)canvasTexture.height };
-	Rectangle dest = { (float)canvas->x, (float)canvas->y, (float)canvas->viewWidth, (float)canvas->viewHeight };
+	Rectangle dest = { (float)viewport->x+viewport->canvasX, (float)viewport->y+viewport->canvasY, (float)viewport->canvasWidth, (float)viewport->canvasHeight };
 	DrawTexturePro(canvasTexture, source, dest, (Vector2){ 0, 0 }, 0, WHITE);
 }
 
@@ -135,17 +186,16 @@ void drawCircle(const Canvas *canvas, const Brush brush, int x, int y) {
 	}
 }
 
-void tryDrawToCanvas(const Canvas *canvas, const Brush brush) {
+void tryDrawToCanvas(const Viewport *viewport,const Canvas *canvas, const Brush brush) {
 	static int prevMouseX = 0;
 	static int prevMouseY = 0;
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !hoveringGUI) {
 		Vector2 mousePos = GetMousePosition();
-		double widthRatio = (double)canvas->width / (double)canvas->viewWidth;
-		double heightRatio = (double)canvas->height / (double)canvas->viewHeight;
-		int mouseX = (int)((mousePos.x - canvas->x) * widthRatio);
-		int mouseY = (int)((mousePos.y - canvas->y) * heightRatio);
-		int topLeft = (mouseY - brush.size/2) * screenWidth + (mouseX - brush.size/2);
+		double widthRatio = (double)canvas->width / (double)viewport->canvasWidth;
+		double heightRatio = (double)canvas->height / (double)viewport->canvasHeight;
+		int mouseX = (int)((mousePos.x - viewport->canvasX - viewport->x) * widthRatio);
+		int mouseY = (int)((mousePos.y - viewport->canvasY - viewport->y) * heightRatio);
 
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			drawing = true;

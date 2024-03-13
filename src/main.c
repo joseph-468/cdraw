@@ -1,21 +1,25 @@
 #include <raylib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../include/canvas.h"
 #include "../include/gui.h"
 #include "../include/font.h"
 #include "../include/icon.h"
 
+#define DEFAULT_WIDTH 1024
+#define DEFAULT_HEIGHT 576
+
 int main() {
 	// Initilization
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-	InitWindow(screenWidth, screenHeight, "Paint");
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+	InitWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Paint");
 	SetTargetFPS(360);
-	BeginBlendMode(BLEND_ALPHA);
 
 	setCurrentFont(jetBrainsMonoMedium);
-	Canvas canvas = createBlankCanvas(319, 159, screenWidth - 481, screenHeight - 321);
+	Canvas canvas = createBlankCanvas(1920, 1080);
+	Viewport viewport = createViewport(&canvas, 319, 119);
 	Brush brush = {
 		.type = PENCIL,
 		.shape = SQUARE,
@@ -27,40 +31,55 @@ int main() {
 
 	const unsigned char *shapeIcons[2] = { squareIcon, circleIcon };
 	const int shapeIconLens[2] = { squareIconLen, circleIconLen };
-	RadioButtons brushShapeButtons = createRadioButtons(50, 100, 32, 32, 2, shapeIcons, shapeIconLens);
+	RadioButtons brushShapeButtons = createRadioButtons(50, 119, 32, 32, 2, shapeIcons, shapeIconLens);
 
 	const unsigned char *typeIcons[2] = { pencilIcon, eraserIcon };
 	const int typeIconLens[2] = { pencilIconLen, eraserIconLen };
-	RadioButtons brushTypeButtons = createRadioButtons(150, 100, 32, 32, 2, typeIcons, typeIconLens);
+	RadioButtons brushTypeButtons = createRadioButtons(150, 119, 32, 32, 2, typeIcons, typeIconLens);
 
-	TextInput brushSizeBox = createTextInput(50, 175, 70, 30, "Brush Size", "8", isValidBrushSize);
-	TextInput redBox = createTextInput(50, 250, 70, 30, "Red", "0", isValidColor);
-	TextInput greenBox = createTextInput(50, 300, 70, 30, "Green", "0", isValidColor);
-	TextInput blueBox = createTextInput(50, 350, 70, 30, "Blue", "0", isValidColor);
-	TextInput alphaBox = createTextInput(50, 400, 70, 30, "Alpha", "255", isValidColor);
+	TextInput brushSizeBox = createTextInput(50, 219, 70, 30, "Brush Size", "8", isValidBrushSize);
+	TextInput redBox = createTextInput(50, 269, 70, 30, "Red", "0", isValidColor);
+	TextInput greenBox = createTextInput(50, 319, 70, 30, "Green", "0", isValidColor);
+	TextInput blueBox = createTextInput(50, 369, 70, 30, "Blue", "0", isValidColor);
+	TextInput alphaBox = createTextInput(50, 419, 70, 30, "Alpha", "255", isValidColor);
 
 	// Main loop
 	while (!WindowShouldClose()) {
 		if (GetMouseWheelMoveV().y && !hoveringGUI) {
 			Vector2 cursorPos = GetMousePosition();
 			double widthRatio = (double)canvas.width / (double)canvas.height;
-			double x = widthRatio * 10 * GetMouseWheelMoveV().y;
-			double y = 10 * GetMouseWheelMoveV().y;
-			canvas.viewWidth += x;
-			canvas.viewHeight += y;
-			canvas.x = 319 + (double)(screenWidth-481 - canvas.viewWidth) / 2;
-			canvas.y = 159 + (double)(screenHeight-321 - canvas.viewHeight) / 2;
+			double heightRatio = (double)canvas.height / (double)canvas.width;
+			double x, y;
+			if (widthRatio < heightRatio) {
+				x = widthRatio * 10 * GetMouseWheelMoveV().y;
+				y = 10 * GetMouseWheelMoveV().y;
+			}
+			else {
+				x = 10 * GetMouseWheelMoveV().y;
+				y = heightRatio * 10 * GetMouseWheelMoveV().y;
+			}
+			if (viewport.canvasWidth + x > widthRatio && viewport.canvasWidth + x > heightRatio ||
+				viewport.canvasHeight + y > widthRatio && viewport.canvasHeight + y > heightRatio) {
+				viewport.canvasWidth += x;
+				viewport.canvasHeight += y;
+				viewport.canvasX = (double)(viewport.width - viewport.canvasWidth) / 2;
+				viewport.canvasY = (double)(viewport.height - viewport.canvasHeight) / 2;
+			}
 		}
 
 		// Update canvas buffer
-		tryDrawToCanvas(&canvas, brush);
+		tryDrawToCanvas(&viewport, &canvas, brush);
 
 		// Start rendering to screen
 		BeginDrawing();
+		ClearBackground(GRAY);
 
 		// Update GUI
+		resizeViewport(&viewport);
+		scaleCanvasInViewport(&viewport);
+
 		hoveringGUI = false;
-		drawCoordinates(&canvas);
+		drawCoordinates(&viewport);
 
 		drawTextButton(&saveButton);
 		if (textButtonPressed(&saveButton)) {
@@ -92,8 +111,8 @@ int main() {
 		brush.color.a = atoi(alphaBox.text);
 
 		// Draw canvas to screen
-		DrawRectangleLines(318, 158, screenWidth - 479, screenHeight - 319, BLACK);
-		renderCanvas(&canvas);
+		DrawRectangleLines(viewport.x-1, viewport.y-1, viewport.width+2, viewport.height+2, BLACK);
+		renderCanvas(&viewport);
 
 		EndDrawing();
 	}
