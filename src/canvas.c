@@ -143,6 +143,7 @@ void renderCanvas(const Viewport *viewport) {
 	UpdateTexture(canvasTexture, viewport->canvas->buffer);
 	DrawTexturePro(backgroundTexture, source, dest, (Vector2){ 0, 0 }, 0, WHITE);
 	DrawTexturePro(canvasTexture, source, dest, (Vector2){ 0, 0 }, 0, WHITE);
+	DrawRectangleLines(viewport->x-1, viewport->y-1, viewport->width+2, viewport->height+2, BLACK);
 }
 
 void drawSquare(const Canvas *canvas, const Brush brush, const int x, const int y) {

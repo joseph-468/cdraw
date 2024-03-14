@@ -18,7 +18,7 @@ int main() {
 	SetTargetFPS(360);
 
 	setCurrentFont(jetBrainsMonoMedium);
-	Canvas canvas = createBlankCanvas(400, 400);
+	Canvas canvas = createBlankCanvas(1920, 1080);
 	Viewport viewport = createViewport(&canvas, 319, 119);
 	Brush brush = {
 		.type = PENCIL,
@@ -110,7 +110,6 @@ int main() {
 		brush.color.a = atoi(alphaBox.text);
 
 		// Draw canvas to screen
-		DrawRectangleLines(viewport.x-1, viewport.y-1, viewport.width+2, viewport.height+2, BLACK);
 		renderCanvas(&viewport);
 
 		EndDrawing();
