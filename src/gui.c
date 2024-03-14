@@ -62,8 +62,8 @@ void drawCoordinates(const Viewport *viewport) {
 	Vector2 mousePos = GetMousePosition();
 	double widthRatio = (double)viewport->canvas->width / viewport->canvasWidth;
 	double heightRatio = (double)viewport->canvas->height / viewport->canvasHeight;
-	int mouseX = (mousePos.x - viewport->canvasX - viewport->x) * widthRatio;
-	int mouseY = (mousePos.y - viewport->canvasY - viewport->y) * heightRatio;
+	int mouseX = getRelativePos(viewport).x;
+	int mouseY = getRelativePos(viewport).y;
 	DrawTextEx(currentFont, TextFormat("X: %i Y: %i", mouseX, mouseY), (Vector2){viewport->x, viewport->y + viewport->height}, 32, 0, BLACK);
 }
 

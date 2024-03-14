@@ -12,6 +12,7 @@
 #define DISTANCE_FROM_WIDTH 480;
 #define DISTANCE_FROM_HEIGHT 270;
 
+static Texture backgroundTexture;
 static Texture canvasTexture;
 
 bool drawing = false;
@@ -35,6 +36,18 @@ Viewport createViewport(const Canvas *canvas, const double x, const double y) {
 
 	return viewport;
 }
+
+Vector2 getRelativePos(const Viewport *viewport) {
+	Vector2 mousePos = GetMousePosition();
+	double widthRatio = (double)viewport->canvas->width / viewport->canvasWidth;
+	double heightRatio = (double)viewport->canvas->height / viewport->canvasHeight;
+	Vector2 relativePos;
+	relativePos.x = (mousePos.x - viewport->canvasX - viewport->x) * widthRatio;
+	relativePos.y = (mousePos.y - viewport->canvasY - viewport->y) * heightRatio;
+
+	return relativePos;
+}
+
 
 void resizeViewport(Viewport* viewport) {
 	double prevWidth = viewport->width;
@@ -78,17 +91,36 @@ Canvas createBlankCanvas(const int width, const int height) {
 		.buffer = NULL,
 	};
 
-	drawnPixels = (bool*)calloc(width * height, sizeof(bool));
+	drawnPixels = (bool*)malloc(width * height * sizeof(bool));
 	HANDLE_MALLOC_FAILURE(drawnPixels);
 	memset(drawnPixels, false, width * height * sizeof(bool));
 
 	Image tempImage = GenImageColor(width, height, WHITE);
 	canvasTexture = LoadTextureFromImage(tempImage);
-    UnloadImage(tempImage);
 
 	canvas.buffer = (Color*)malloc(width * height * sizeof(Color));
 	HANDLE_MALLOC_FAILURE(canvas.buffer);
 	memset(canvas.buffer, 255, width * height * sizeof(Color));
+
+	// Background stuff
+	backgroundTexture = LoadTextureFromImage(tempImage);
+	UnloadImage(tempImage);
+	Color* backgroundBuffer = (Color*)malloc(width * height * sizeof(Color));
+	HANDLE_MALLOC_FAILURE(backgroundBuffer);
+	memset(backgroundBuffer, 255, width * height * sizeof(Color));
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			if ((x / 64 + y / 64) % 2 == 0) {
+				backgroundBuffer[y * width + x] = GRAY;
+			}
+			else {
+				backgroundBuffer[y * width + x] = LIGHTGRAY;
+			}
+		}
+	}
+	UpdateTexture(backgroundTexture, backgroundBuffer);
+	free(backgroundBuffer);
 
 	return canvas;
 }
@@ -106,9 +138,10 @@ bool saveImage(const Canvas *canvas) {
 }
 
 void renderCanvas(const Viewport *viewport) {
+	Rectangle source = { 0, 0, canvasTexture.width, canvasTexture.height };
+	Rectangle dest = { viewport->x + viewport->canvasX, viewport->y + viewport->canvasY, viewport->canvasWidth, viewport->canvasHeight };
 	UpdateTexture(canvasTexture, viewport->canvas->buffer);
-	Rectangle source = { 0, 0, (float)canvasTexture.width, (float)canvasTexture.height };
-	Rectangle dest = { (float)viewport->x+viewport->canvasX, (float)viewport->y+viewport->canvasY, (float)viewport->canvasWidth, (float)viewport->canvasHeight };
+	DrawTexturePro(backgroundTexture, source, dest, (Vector2){ 0, 0 }, 0, WHITE);
 	DrawTexturePro(canvasTexture, source, dest, (Vector2){ 0, 0 }, 0, WHITE);
 }
 
@@ -191,11 +224,8 @@ void tryDrawToCanvas(const Viewport *viewport,const Canvas *canvas, const Brush 
 	static int prevMouseY = 0;
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !hoveringGUI) {
-		Vector2 mousePos = GetMousePosition();
-		double widthRatio = (double)canvas->width / (double)viewport->canvasWidth;
-		double heightRatio = (double)canvas->height / (double)viewport->canvasHeight;
-		int mouseX = (int)((mousePos.x - viewport->canvasX - viewport->x) * widthRatio);
-		int mouseY = (int)((mousePos.y - viewport->canvasY - viewport->y) * heightRatio);
+		int mouseX = getRelativePos(viewport).x;
+		int mouseY = getRelativePos(viewport).y;
 
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			drawing = true;

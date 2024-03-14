@@ -18,7 +18,7 @@ int main() {
 	SetTargetFPS(360);
 
 	setCurrentFont(jetBrainsMonoMedium);
-	Canvas canvas = createBlankCanvas(1920, 1080);
+	Canvas canvas = createBlankCanvas(1088, 612);
 	Viewport viewport = createViewport(&canvas, 319, 119);
 	Brush brush = {
 		.type = PENCIL,
@@ -46,7 +46,6 @@ int main() {
 	// Main loop
 	while (!WindowShouldClose()) {
 		if (GetMouseWheelMoveV().y && !hoveringGUI) {
-			Vector2 cursorPos = GetMousePosition();
 			double widthRatio = (double)canvas.width / (double)canvas.height;
 			double heightRatio = (double)canvas.height / (double)canvas.width;
 			double x, y;
