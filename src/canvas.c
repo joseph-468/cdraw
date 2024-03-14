@@ -159,61 +159,74 @@ void drawSquare(const Canvas *canvas, const Brush brush, const int x, const int 
 	for (int i = top; i < bottom; i++) {
 		for (int j = left; j < right; j++) {
 			size_t dest = i * canvas->width + j;
-			if (!drawnPixels[dest]) {
-				int r, g, b, a;
-				if (brush.type == PENCIL) {
-					Color dstColor = canvas->buffer[dest];
-					double normalizedAlpha = (double)brush.color.a / 255;
-					r = (int)(brush.color.r * normalizedAlpha + dstColor.r * (1 - normalizedAlpha));
-					g = (int)(brush.color.g * normalizedAlpha + dstColor.g * (1 - normalizedAlpha));
-					b = (int)(brush.color.b * normalizedAlpha + dstColor.b * (1 - normalizedAlpha)); 
-					a = (int)(normalizedAlpha + ((double)dstColor.a / 255 * (1 - normalizedAlpha))) * 255;
-				}
-				else {
-					r = g = b = a = 0;
-				}
-				canvas->buffer[i * canvas->width + j] = (Color){ r, g, b, a };
-				drawnPixels[dest] = true;
+			if (drawnPixels[dest]) continue;
+			int r = 0, g = 0, b = 0, a = 0;
+			if (brush.type == PENCIL) {
+				Color dstColor = canvas->buffer[dest];
+				double normalizedAlpha = (double)brush.color.a / 255;
+				r = (int)(brush.color.r * normalizedAlpha + dstColor.r * (1 - normalizedAlpha));
+				g = (int)(brush.color.g * normalizedAlpha + dstColor.g * (1 - normalizedAlpha));
+				b = (int)(brush.color.b * normalizedAlpha + dstColor.b * (1 - normalizedAlpha)); 
+				a = (int)(normalizedAlpha + ((double)dstColor.a / 255 * (1 - normalizedAlpha))) * 255;
 			}
+			canvas->buffer[i * canvas->width + j] = (Color){ r, g, b, a };
+			drawnPixels[dest] = true;
 		}
 	}
 }
 
 void drawCircle(const Canvas *canvas, const Brush brush, int x, int y) {
+	static bool* shapeCache = NULL;
+	static int shapeCacheSize = 0;
+
+	float evenOffset = (float)((brush.size % 2 == 0) ? 0.5 : 0);
 	const int halfSize = brush.size / 2;
 	const double radius = (double)brush.size / 2;
-	const int left = max(x - halfSize, 0);
+	const int left = x - halfSize;
 	if (left > canvas->width-1) return;
-	const int top = max(y - halfSize, 0);
+	const int top = y - halfSize;
 	if (top > canvas->height-1) return;
 	const int right = min(x + halfSize + ((brush.size % 2 == 0) ? 0 : 1), canvas->width);
 	if (right < 0) return;
 	const int bottom = min(y + halfSize + ((brush.size % 2 == 0) ? 0 : 1), canvas->height);
 	if (bottom < 0) return;
-
-	float evenOffset = (float)((brush.size % 2 == 0) ? 0.5 : 0);
 	double distance;
-	for (int i = top; i < bottom; i++) {
-		for (int j = left; j < right; j++) {
-			distance = Vector2Distance((Vector2){ x-evenOffset, y-evenOffset }, (Vector2){ (float)j, (float)i });
-			if (distance <= radius) {
-				int r, g, b, a;
-				size_t dest = i * canvas->width + j;
-				if (!drawnPixels[dest]) {
-					if (brush.type == PENCIL) {
-						Color dstColor = canvas->buffer[dest];
-						double normalizedAlpha = (double)brush.color.a / 255;
-						r = (int)(brush.color.r * normalizedAlpha + dstColor.r * (1 - normalizedAlpha));
-						g = (int)(brush.color.g * normalizedAlpha + dstColor.g * (1 - normalizedAlpha));
-						b = (int)(brush.color.b * normalizedAlpha + dstColor.b * (1 - normalizedAlpha)); 
-						a = (int)(normalizedAlpha + ((double)dstColor.a / 255 * (1 - normalizedAlpha))) * 255;
-					}
-					else {
-						r = g = b = a = 0;
-					}
-					canvas->buffer[i * canvas->width + j] = (Color){ r, g, b, a };
-					drawnPixels[dest] = true;
+
+	// Calculate pixels that should be drawn in circle and cache it
+	if (shapeCacheSize != brush.size) {
+		if (shapeCache) {
+			free(shapeCache);
+		}
+		shapeCache = calloc(brush.size * brush.size, sizeof(bool));
+		HANDLE_MALLOC_FAILURE(shapeCache);
+		shapeCacheSize = brush.size;
+		for (int i = 0; i < brush.size; i++) {
+			for (int j = 0; j < brush.size; j++) {
+				distance = Vector2Distance((Vector2) { halfSize - evenOffset, halfSize - evenOffset }, (Vector2) { (float)j, (float)i });
+				if (distance <= radius) {
+					shapeCache[i * brush.size + j] = true;
 				}
+			}
+		}
+	}
+	else if (shapeCacheSize == brush.size) {
+		for (int i = top; i < bottom; i++) {
+			for (int j = left; j < right; j++) {
+				if (i < 0 || j < 0) continue;
+				size_t dest = i * canvas->width + j;
+				if (!shapeCache[(i-top) * brush.size + (j-left)]) continue;
+				if (drawnPixels[dest]) continue;
+				int r = 0, g = 0, b = 0, a = 0;
+				if (brush.type == PENCIL) {
+					Color dstColor = canvas->buffer[dest];
+					double normalizedAlpha = (double)brush.color.a / 255;
+					r = (int)(brush.color.r * normalizedAlpha + dstColor.r * (1 - normalizedAlpha));
+					g = (int)(brush.color.g * normalizedAlpha + dstColor.g * (1 - normalizedAlpha));
+					b = (int)(brush.color.b * normalizedAlpha + dstColor.b * (1 - normalizedAlpha));
+					a = (int)(normalizedAlpha + ((double)dstColor.a / 255 * (1 - normalizedAlpha))) * 255;
+				}
+				canvas->buffer[i * canvas->width + j] = (Color){ r, g, b, a };
+				drawnPixels[dest] = true;
 			}
 		}
 	}

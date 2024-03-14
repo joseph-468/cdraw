@@ -18,7 +18,7 @@ int main() {
 	SetTargetFPS(360);
 
 	setCurrentFont(jetBrainsMonoMedium);
-	Canvas canvas = createBlankCanvas(1088, 612);
+	Canvas canvas = createBlankCanvas(400, 400);
 	Viewport viewport = createViewport(&canvas, 319, 119);
 	Brush brush = {
 		.type = PENCIL,
