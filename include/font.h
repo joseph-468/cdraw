@@ -2,13 +2,14 @@
 #define FONT_H
 
 #include <raylib.h>
+#include <stdint.h>
 
 extern Font currentFont;
 extern GlyphInfo currentFontInfo;
 
-void setCurrentFont(const unsigned char *data);
+void setCurrentFont(const uint8_t *data);
 
-extern const unsigned char jetBrainsMonoMedium[273860];
+extern const uint8_t jetBrainsMonoMedium[273860];
 
 #endif
 

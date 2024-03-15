@@ -2,17 +2,18 @@
 #define ICONS_H
 
 #include <raylib.h>
+#include <stdint.h>
 
-Texture loadIcon(const unsigned char *data, int dataLen);
+Texture loadIcon(const uint8_t *data, uint64_t dataLen);
 
-extern const unsigned int squareIconLen;
-extern const unsigned int circleIconLen;
-extern const unsigned int pencilIconLen;
-extern const unsigned int eraserIconLen;
+extern const uint64_t squareIconLen;
+extern const uint64_t circleIconLen;
+extern const uint64_t pencilIconLen;
+extern const uint64_t eraserIconLen;
 
-extern const unsigned char squareIcon[];
-extern const unsigned char circleIcon[];
-extern const unsigned char pencilIcon[];
-extern const unsigned char eraserIcon[];
+extern const uint8_t squareIcon[];
+extern const uint8_t circleIcon[];
+extern const uint8_t pencilIcon[];
+extern const uint8_t eraserIcon[];
 
 #endif 

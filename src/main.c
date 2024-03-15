@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "../include/canvas.h"
 #include "../include/gui.h"
@@ -17,7 +18,7 @@ int main() {
 	InitWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Paint");
 	setCurrentFont(jetBrainsMonoMedium);
 
-	Canvas canvas = createBlankCanvas(1920, 1080);
+	Canvas canvas = createBlankCanvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 	Viewport viewport = createViewport(&canvas, 319, 119);
 	Brush brush = {
 		.type = PENCIL,
@@ -29,12 +30,12 @@ int main() {
 	TextButton newButton = createTextButton(10, 10, 100, 30, "New");
 	TextButton saveButton = createTextButton(120, 10, 100, 30, "Save");
 
-	const unsigned char *shapeIcons[2] = { squareIcon, circleIcon };
-	const int shapeIconLens[2] = { squareIconLen, circleIconLen };
+	const uint8_t *shapeIcons[2] = { squareIcon, circleIcon };
+	const uint64_t shapeIconLens[2] = { squareIconLen, circleIconLen };
 	RadioButtons brushShapeButtons = createRadioButtons(50, 119, 32, 32, 2, shapeIcons, shapeIconLens);
 
-	const unsigned char *typeIcons[2] = { pencilIcon, eraserIcon };
-	const int typeIconLens[2] = { pencilIconLen, eraserIconLen };
+	const uint8_t *typeIcons[2] = { pencilIcon, eraserIcon };
+	const uint64_t typeIconLens[2] = { pencilIconLen, eraserIconLen };
 	RadioButtons brushTypeButtons = createRadioButtons(150, 119, 32, 32, 2, typeIcons, typeIconLens);
 
 	TextInput brushSizeBox = createTextInput(50, 219, 70, 30, "Brush Size", "8", isValidBrushSize);
@@ -63,9 +64,17 @@ int main() {
 		drawCoordinates(&viewport);
 
 		drawTextButton(&newButton);
+		if (textButtonPressed(&newButton)) {
+			OptionalCanvas result = newCanvasPrompt();
+			if (result.hasCanvas) {
+				free(canvas.buffer);
+				canvas = result.canvas;
+				viewport = createViewport(&canvas, 319, 119);
+			}
+		}
 		drawTextButton(&saveButton);
 		if (textButtonPressed(&saveButton)) {
-			saveImage(&canvas);
+			saveImagePrompt(viewport.canvas);
 		}
 
 		brush.shape = checkRadioButtons(&brushShapeButtons);
