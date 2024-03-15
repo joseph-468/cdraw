@@ -45,38 +45,20 @@ int main() {
 
 	// Main loop
 	while (!WindowShouldClose()) {
-		if (GetMouseWheelMoveV().y && !hoveringGUI) {
-			double widthRatio = (double)canvas.width / (double)canvas.height;
-			double heightRatio = (double)canvas.height / (double)canvas.width;
-			double x, y;
-			if (widthRatio < heightRatio) {
-				x = widthRatio * 10 * GetMouseWheelMoveV().y;
-				y = 10 * GetMouseWheelMoveV().y;
-			}
-			else {
-				x = 10 * GetMouseWheelMoveV().y;
-				y = heightRatio * 10 * GetMouseWheelMoveV().y;
-			}
-			if (viewport.canvasWidth + x > widthRatio && viewport.canvasWidth + x > heightRatio ||
-				viewport.canvasHeight + y > widthRatio && viewport.canvasHeight + y > heightRatio) {
-				viewport.canvasWidth += x;
-				viewport.canvasHeight += y;
-				viewport.canvasX = (double)(viewport.width - viewport.canvasWidth) / 2;
-				viewport.canvasY = (double)(viewport.height - viewport.canvasHeight) / 2;
-			}
-		}
-
+		// Handle all modifications to viewport and canvas size
+		keepMinimumWindowSize();
+		resizeViewport(&viewport);
+		handleCanvasZoom(&viewport);
+		scaleCanvasInViewport(&viewport);
+		
 		// Update canvas buffer
-		tryDrawToCanvas(&viewport, &canvas, brush);
+		tryDrawToCanvas(&viewport, brush);
 
 		// Start rendering to screen
 		BeginDrawing();
 		ClearBackground(GRAY);
 
 		// Update GUI
-		resizeViewport(&viewport);
-		scaleCanvasInViewport(&viewport);
-
 		hoveringGUI = false;
 		drawCoordinates(&viewport);
 

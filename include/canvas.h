@@ -43,10 +43,12 @@ typedef struct Brush {
 Canvas createBlankCanvas(const int width, const int height);
 Viewport createViewport(const Canvas *canvas, const double x, const double y);
 Vector2 getRelativePos(const Viewport *viewport);
+void keepMinimumWindowSize();
+void handleCanvasZoom(Viewport *viewport);
 void resizeViewport(Viewport *viewport);
 void scaleCanvasInViewport(Viewport *viewport);
 void renderCanvas(const Viewport *viewport);
-void tryDrawToCanvas(const Viewport *viewport, const Canvas *canvas, const Brush brush);
+void tryDrawToCanvas(const Viewport *viewport, const Brush brush);
 bool saveImage(const Canvas* canvas);
 
 #endif

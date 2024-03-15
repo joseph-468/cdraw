@@ -11,6 +11,8 @@
 
 #define DISTANCE_FROM_WIDTH 480;
 #define DISTANCE_FROM_HEIGHT 270;
+#define MIN_WIDTH 854
+#define MIN_HEIGHT 480 
 
 static Texture backgroundTexture;
 static Texture canvasTexture;
@@ -48,6 +50,38 @@ Vector2 getRelativePos(const Viewport *viewport) {
 	return relativePos;
 }
 
+void keepMinimumWindowSize() {
+	if (IsWindowResized()) {
+		int width = GetScreenWidth();
+		int height = GetScreenHeight();
+		if (width < MIN_WIDTH || height < MIN_HEIGHT) {
+			SetWindowSize((width < MIN_WIDTH) ? MIN_WIDTH : width, (height < MIN_HEIGHT) ? MIN_HEIGHT : height);
+		}
+	}
+}
+
+void handleCanvasZoom(Viewport *viewport) {
+	if (GetMouseWheelMoveV().y && !hoveringGUI) {
+		double widthRatio = (double)viewport->canvas->width / (double)viewport->canvas->height;
+		double heightRatio = (double)viewport->canvas->height / (double)viewport->canvas->width;
+		double x, y;
+		if (widthRatio < heightRatio) {
+			x = widthRatio * 10 * GetMouseWheelMoveV().y;
+			y = 10 * GetMouseWheelMoveV().y;
+		}
+		else {
+			x = 10 * GetMouseWheelMoveV().y;
+			y = heightRatio * 10 * GetMouseWheelMoveV().y;
+		}
+		if (viewport->canvasWidth + x > widthRatio && viewport->canvasWidth + x > heightRatio ||
+			viewport->canvasHeight + y > widthRatio && viewport->canvasHeight + y > heightRatio) {
+			viewport->canvasWidth += x;
+			viewport->canvasHeight += y;
+			viewport->canvasX = (double)(viewport->width - viewport->canvasWidth) / 2;
+			viewport->canvasY = (double)(viewport->height - viewport->canvasHeight) / 2;
+		}
+	}
+}
 
 void resizeViewport(Viewport* viewport) {
 	double prevWidth = viewport->width;
@@ -233,7 +267,7 @@ void drawCircle(const Canvas *canvas, const Brush brush, int x, int y) {
 	}
 }
 
-void tryDrawToCanvas(const Viewport *viewport,const Canvas *canvas, const Brush brush) {
+void tryDrawToCanvas(const Viewport *viewport, const Brush brush) {
 	static int prevMouseX = 0;
 	static int prevMouseY = 0;
 
@@ -256,10 +290,10 @@ void tryDrawToCanvas(const Viewport *viewport,const Canvas *canvas, const Brush 
 			float y = (float)mouseY;
 			for (int i = 0; i <= steps; i++) {
 				if (brush.shape == SQUARE) {
-					drawSquare(canvas, brush, (int)roundf(x), (int)roundf(y));
+					drawSquare(viewport->canvas, brush, (int)roundf(x), (int)roundf(y));
 				}
 				if (brush.shape == CIRCLE) {
-					drawCircle(canvas, brush, (int)roundf(x), (int)roundf(y));
+					drawCircle(viewport->canvas, brush, (int)roundf(x), (int)roundf(y));
 				}
 				x += xInc;
 				y += yInc;
@@ -272,7 +306,7 @@ void tryDrawToCanvas(const Viewport *viewport,const Canvas *canvas, const Brush 
 	}
 	else {
 		if (drawing) {
-			memset(drawnPixels, false, canvas->width * canvas->height * sizeof(bool));
+			memset(drawnPixels, false, viewport->canvas->width * viewport->canvas->height * sizeof(bool));
 		}
 		drawing = false;
 	}
