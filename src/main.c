@@ -13,11 +13,10 @@
 
 int main() {
 	// Initilization
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE || FLAG_VSYNC_HINT);
 	InitWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Paint");
-	SetTargetFPS(360);
-
 	setCurrentFont(jetBrainsMonoMedium);
+
 	Canvas canvas = createBlankCanvas(1920, 1080);
 	Viewport viewport = createViewport(&canvas, 319, 119);
 	Brush brush = {

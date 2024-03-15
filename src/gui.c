@@ -59,11 +59,10 @@ void isValidColor(int ch, TextInput *const textInput) {
 }
 
 void drawCoordinates(const Viewport *viewport) {
-	Vector2 mousePos = GetMousePosition();
-	double widthRatio = (double)viewport->canvas->width / viewport->canvasWidth;
-	double heightRatio = (double)viewport->canvas->height / viewport->canvasHeight;
 	int mouseX = getRelativePos(viewport).x;
 	int mouseY = getRelativePos(viewport).y;
+	double widthRatio = (double)viewport->canvas->width / viewport->canvasWidth;
+	double heightRatio = (double)viewport->canvas->height / viewport->canvasHeight;
 	DrawTextEx(currentFont, TextFormat("X: %i Y: %i", mouseX, mouseY), (Vector2){viewport->x, viewport->y + viewport->height}, 32, 0, BLACK);
 }
 
