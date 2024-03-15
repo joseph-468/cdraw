@@ -13,7 +13,7 @@
 
 int main() {
 	// Initilization
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE || FLAG_VSYNC_HINT);
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
 	InitWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Paint");
 	setCurrentFont(jetBrainsMonoMedium);
 
@@ -26,7 +26,8 @@ int main() {
 		.size = 8,
 	};
 
-	TextButton saveButton = createTextButton(10, 10, 100, 30, "Save");
+	TextButton newButton = createTextButton(10, 10, 100, 30, "New");
+	TextButton saveButton = createTextButton(120, 10, 100, 30, "Save");
 
 	const unsigned char *shapeIcons[2] = { squareIcon, circleIcon };
 	const int shapeIconLens[2] = { squareIconLen, circleIconLen };
@@ -61,6 +62,7 @@ int main() {
 		hoveringGUI = false;
 		drawCoordinates(&viewport);
 
+		drawTextButton(&newButton);
 		drawTextButton(&saveButton);
 		if (textButtonPressed(&saveButton)) {
 			saveImage(&canvas);

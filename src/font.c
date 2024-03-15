@@ -5,8 +5,8 @@ Font currentFont;
 GlyphInfo currentFontInfo;
 
 void setCurrentFont(const unsigned char *data) {
-	Font font = LoadFontFromMemory(".ttf", data, sizeof(data), 64, NULL, 0);
-	GlyphInfo info = GetGlyphInfo(font, 64);
+	Font font = LoadFontFromMemory(".ttf", data, sizeof(data), 128, NULL, 0);
+	GlyphInfo info = GetGlyphInfo(font, 128);
 	currentFont = font;
 	currentFontInfo = info;
 }
