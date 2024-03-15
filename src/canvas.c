@@ -240,9 +240,7 @@ void drawCircle(const Canvas *canvas, const Brush brush, int64_t x, int64_t y) {
 
 	// Calculate pixels that should be drawn in circle and cache it
 	if (shapeCacheSize != brush.size) {
-		if (shapeCache) {
-			free(shapeCache);
-		}
+		if (shapeCache) free(shapeCache);
 		shapeCache = calloc(brush.size * brush.size, sizeof(bool));
 		HANDLE_MALLOC_FAILURE(shapeCache);
 		shapeCacheSize = brush.size;

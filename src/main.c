@@ -12,10 +12,10 @@
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 576
 
-int main() {
+int WinMain() {
 	// Initilization
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-	InitWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Paint");
+	InitWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "CDraw");
 	setCurrentFont(jetBrainsMonoMedium);
 
 	Canvas canvas = createBlankCanvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
